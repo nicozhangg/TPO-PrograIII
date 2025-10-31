@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Visualizador Rutas F1</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.polyline.snakeanim@0.1.0/Leaflet.Polyline.SnakeAnim.js"></script>
+
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; }
+    #map { height: 100vh; width: 100%; }
+
+    /* Panel lateral */
+    #panel {
+      position: absolute;
+      top: 10px; left: 10px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 10px 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      min-width: 280px;
+    }
+
+    #panel.oculto {
+      transform: translateX(-110%);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    #toggle {
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    #toggle:hover { background: rgba(0,0,0,0.8); }
+
+    select, input, button {
+      margin: 5px 0; width: 100%;
+      padding: 5px;
+    }
+
+    #ejecutar {
+      background: #333; color: #fff; font-weight: 600;
+      border: none; border-radius: 6px; cursor: pointer;
+    }
+
+    #ejecutar:hover { background: #555; }
+
+    /* Botón flotante para volver a abrir el panel */
+    #abrir-panel {
+      position: absolute;
+      top: 15px; left: 15px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 16px;
+      cursor: pointer;
+      z-index: 900;
+      display: none; /* oculto por defecto */
+      transition: background 0.2s ease;
+    }
+
+    #abrir-panel:hover {
+      background: rgba(0,0,0,0.9);
+    }
+  </style>
+</head>
+<body>
+  <!-- Botón flotante para volver a abrir -->
+  <button id="abrir-panel" title="Mostrar menú">➡️</button>
+
+  <div id="panel">
+    <div class="panel-header">
+      <h4 class="panel-title">🌍 Ruta F1</h4>
+      <button id="toggle" title="Contraer menú">⬅️</button>
+    </div>
+
+    <label>Algoritmo:</label>
+    <select id="algoritmo">
+      <option value="nearest">Greedy (TSP)</option>
+      <option value="dijkstra">Dijkstra (A → B)</option>
+      <option value="bfs">BFS (rango km)</option>
+    </select>
+
+    <div id="params">
+      <input id="origen" placeholder="Origen (solo Dijkstra)" />
+      <input id="destino" placeholder="Destino (solo Dijkstra)" />
+      <input id="inicio" placeholder="Inicio (solo BFS)" />
+      <input id="maxkm" type="number" placeholder="max_km (solo BFS)" />
+    </div>
+
+    <button id="ejecutar">Ejecutar</button>
+  </div>
+
+  <div id="map"></div>
+
+  <script>
+    const map = L.map('map').setView([20, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const colores = {
+      nearest: 'red',
+      dijkstra: 'blue',
+      bfs: 'green'
+    };
+
+    const panel = document.getElementById('panel');
+    const toggle = document.getElementById('toggle');
+    const abrirBtn = document.getElementById('abrir-panel');
+    let oculto = false;
+
+    // Ocultar panel
+    toggle.onclick = () => {
+      oculto = true;
+      panel.classList.add('oculto');
+      abrirBtn.style.display = 'block';
+    };
+
+    // Mostrar panel
+    abrirBtn.onclick = () => {
+      oculto = false;
+      panel.classList.remove('oculto');
+      abrirBtn.style.display = 'none';
+    };
+
+    document.getElementById("ejecutar").onclick = async () => {
+      const alg = document.getElementById("algoritmo").value;
+      let url = `/api/algoritmos/${alg}`;
+
+      // limpiar mapa (mantener capa base)
+      map.eachLayer(layer => {
+        if (layer instanceof L.Marker || layer instanceof L.Polyline) map.removeLayer(layer);
+      });
+
+      if (alg === "dijkstra") {
+        const origen = encodeURIComponent(document.getElementById("origen").value.trim());
+        const destino = encodeURIComponent(document.getElementById("destino").value.trim());
+        if (!origen || !destino) return alert("Debes ingresar origen y destino");
+        url += `?origen=${origen}&destino=${destino}`;
+      } else if (alg === "bfs") {
+        const inicio = encodeURIComponent(document.getElementById("inicio").value.trim());
+        const maxkm = document.getElementById("maxkm").value || 3000;
+        if (!inicio) return alert("Debes ingresar circuito de inicio");
+        url += `?inicio=${inicio}&max_km=${maxkm}`;
+      }
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      let puntosRuta = [];
+      if (alg === "nearest") puntosRuta = data.puntos_ruta;
+      else if (alg === "dijkstra") puntosRuta = data.puntos_ruta;
+      else if (alg === "bfs") puntosRuta = data.puntos_orden;
+
+      if (!puntosRuta || puntosRuta.length === 0) {
+        alert("No se encontraron puntos para mostrar");
+        return;
+      }
+
+      const coords = puntosRuta.map(p => [p.lat, p.lon]);
+
+      puntosRuta.forEach((p, i) => {
+        L.marker([p.lat, p.lon]).addTo(map)
+          .bindPopup(`<b>${i + 1}. ${p.nombre}</b>`);
+      });
+
+      const linea = L.polyline(coords, {
+        color: colores[alg] || 'red',
+        weight: 4,
+        opacity: 0.8
+      }).addTo(map);
+
+      // Animación de la línea
+      linea.snakeIn();
+      map.fitBounds(linea.getBounds());
+
+      const texto = `<b>${data.algoritmo}</b><br>` +
+        (data.km_totales ? `Distancia: ${data.km_totales} km` : '') +
+        (data.max_km ? `<br>max_km: ${data.max_km}` : '');
+      L.popup().setLatLng(coords[0]).setContent(texto).openOn(map);
+    };
+  </script>
+</body>
+</html>

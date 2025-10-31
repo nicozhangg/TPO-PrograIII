@@ -1,0 +1,19 @@
+[
+  { "nombre": "Melbourne (Australia)", "latitud": -37.846, "longitud": 144.971 },
+  { "nombre": "Shanghai (China)", "latitud": 31.338, "longitud": 121.220 },
+  { "nombre": "Suzuka (Japón)", "latitud": 34.843, "longitud": 136.541 },
+  { "nombre": "Sakhir (Bahréin)", "latitud": 26.032, "longitud": 50.511 },
+  { "nombre": "Jeddah (Arabia Saudita)", "latitud": 21.543, "longitud": 39.172 },
+  { "nombre": "Imola (Italia)", "latitud": 44.343, "longitud": 11.716 },
+  { "nombre": "Monaco (Mónaco)", "latitud": 43.734, "longitud": 7.420 },
+  { "nombre": "Barcelona (España)", "latitud": 41.570, "longitud": 2.261 },
+  { "nombre": "Silverstone (Reino Unido)", "latitud": 52.073, "longitud": -1.014 },
+  { "nombre": "Budapest (Hungría)", "latitud": 47.583, "longitud": 19.252 },
+  { "nombre": "Monza (Italia)", "latitud": 45.620, "longitud": 9.290 },
+  { "nombre": "Baku (Azerbaiyán)", "latitud": 40.372, "longitud": 49.853 },
+  { "nombre": "Singapore (Singapur)", "latitud": 1.291, "longitud": 103.863 },
+  { "nombre": "Austin (EE.UU.)", "latitud": 30.132, "longitud": -97.641 },
+  { "nombre": "Mexico City (México)", "latitud": 19.404, "longitud": -99.090 },
+  { "nombre": "Sao Paulo (Brasil)", "latitud": -23.701, "longitud": -46.697 },
+  { "nombre": "Abu Dhabi (EAU)", "latitud": 24.469, "longitud": 54.603 }
+]
