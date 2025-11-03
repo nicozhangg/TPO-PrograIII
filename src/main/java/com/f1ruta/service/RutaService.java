@@ -1,35 +1,36 @@
 package com.f1ruta.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.f1ruta.algoritmo.RutaF1TSP;
 import com.f1ruta.algoritmo.DijkstraRutas;
 import com.f1ruta.algoritmo.BFSRutas;
 import com.f1ruta.algoritmo.RutaF1TSP.Circuito;
+import com.f1ruta.repository.CircuitoRepository;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 @Service
 public class RutaService {
 
-    private final ObjectMapper mapper = new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private final CircuitoRepository circuitoRepository;
+
+    public RutaService(CircuitoRepository circuitoRepository) {
+        this.circuitoRepository = circuitoRepository;
+    }
 
     // ================== Helpers ==================
 
     private List<Circuito> cargarCircuitos() {
-        try (InputStream is = getClass().getResourceAsStream("/data/circuitos.json")) {
-            if (is == null) {
-                throw new IllegalStateException("No se encontró /data/circuitos.json en resources.");
-            }
-            return mapper.readValue(is, new TypeReference<List<Circuito>>() {});
-        } catch (IOException e) {
-            throw new IllegalStateException("Error leyendo /data/circuitos.json", e);
+        List<com.f1ruta.domain.Circuito> circuitosDomain = circuitoRepository.findAll();
+        List<Circuito> circuitos = new ArrayList<>();
+        for (com.f1ruta.domain.Circuito cd : circuitosDomain) {
+            Circuito c = new Circuito();
+            c.nombre = cd.getNombre();
+            c.latitud = cd.getLatitud();
+            c.longitud = cd.getLongitud();
+            circuitos.add(c);
         }
+        return circuitos;
     }
 
     /** Lista de TODOS los puntos (para marcar en el mapa, si querés). */
