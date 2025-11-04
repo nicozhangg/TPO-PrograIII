@@ -49,4 +49,13 @@ public class AlgoritmoController {
     ) {
         return ResponseEntity.ok(servicio.ejecutarBFS(inicio, maxKm));
     }
+
+    @Operation(summary = "Branch & Bound TSP: Ruta óptima exacta desde un origen")
+    @GetMapping("/branch-bound")
+    public ResponseEntity<Map<String, Object>> ejecutarBranchBound(
+            @Parameter(description = "Circuito de origen para iniciar la ruta óptima", example = "Monaco (Mónaco)")
+            @RequestParam(name = "origen", required = false) String origen
+    ) {
+        return ResponseEntity.ok(servicio.ejecutarBranchBound(origen));
+    }
 }

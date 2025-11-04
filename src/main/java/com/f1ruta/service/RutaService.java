@@ -3,6 +3,7 @@ package com.f1ruta.service;
 import com.f1ruta.algoritmo.RutaF1TSP;
 import com.f1ruta.algoritmo.DijkstraRutas;
 import com.f1ruta.algoritmo.BFSRutas;
+import com.f1ruta.algoritmo.BranchBoundTSP;
 import com.f1ruta.algoritmo.RutaF1TSP.Circuito;
 import com.f1ruta.repository.CircuitoRepository;
 import org.springframework.stereotype.Service;
@@ -122,6 +123,24 @@ public class RutaService {
         // Para Leaflet
         out.put("puntos", puntos(circuitos)); // todos los circuitos (marcadores)
         out.put("puntos_orden", puntosEnOrden(circuitos, res.ordenVisita())); // polilínea por niveles
+        return out;
+    }
+
+    /** Branch & Bound TSP: Ruta óptima exacta desde un origen */
+    public Map<String, Object> ejecutarBranchBound(String origen) {
+        List<Circuito> circuitos = cargarCircuitos();
+        var res = BranchBoundTSP.calcularRuta(circuitos, origen);
+
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("algoritmo", "Branch & Bound TSP (Ruta óptima exacta)");
+        out.put("cantidad_circuitos", circuitos.size());
+        out.put("origen", origen != null && !origen.trim().isEmpty() ? origen : circuitos.get(0).nombre);
+        out.put("ruta", res.ruta());
+        out.put("km_totales", res.kmTotales());
+
+        // Para Leaflet
+        out.put("puntos", puntos(circuitos)); // todos los marcadores
+        out.put("puntos_ruta", puntosEnOrden(circuitos, res.ruta())); // ruta ordenada para visualización
         return out;
     }
 }
