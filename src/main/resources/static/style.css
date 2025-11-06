@@ -1,0 +1,126 @@
+:root {
+  --panel-bg: rgba(255, 255, 255, 0.95);
+  --panel-shadow: 0 0 5px rgba(0,0,0,0.3);
+  --btn-dark: rgba(0,0,0,0.7);
+  --btn-dark-hover: rgba(0,0,0,0.9);
+  --transition-speed: 0.3s;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+#map {
+  height: 100vh;
+  width: 100%;
+}
+
+/* Panel lateral */
+#panel {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--panel-bg);
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: var(--panel-shadow);
+  z-index: 1000;
+  transition: transform var(--transition-speed) ease;
+  min-width: 280px;
+  max-width: 320px;
+}
+
+#panel.oculto {
+  transform: translateX(-110%);
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.panel-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+button {
+  cursor: pointer;
+  transition: background var(--transition-speed) ease;
+}
+
+#toggle, #abrir-panel {
+  background: var(--btn-dark);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 14px;
+}
+
+#toggle:hover, #abrir-panel:hover {
+  background: var(--btn-dark-hover);
+}
+
+select, input {
+  margin: 5px 0;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+select:focus, input:focus {
+  outline: none;
+  border-color: #333;
+}
+
+#ejecutar {
+  background: #333;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  margin-top: 10px;
+  width: 100%;
+  font-size: 14px;
+}
+
+#ejecutar:hover {
+  background: #555;
+}
+
+#ejecutar:active {
+  transform: scale(0.98);
+}
+
+#abrir-panel {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  z-index: 900;
+  display: none;
+}
+
+.params-group {
+  display: none;
+  margin: 8px 0;
+}
+
+.params-group.active {
+  display: block;
+}
+
