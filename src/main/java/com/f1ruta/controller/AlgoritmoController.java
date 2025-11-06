@@ -58,4 +58,18 @@ public class AlgoritmoController {
     ) {
         return ResponseEntity.ok(servicio.ejecutarBranchBound(origen));
     }
+
+    @Operation(
+        summary = "Mergesort: Ordena circuitos por criterio (Divide y Vencerás)",
+        description = "Criterios disponibles: latitud, longitud, nombre. Orden: asc o desc."
+    )
+    @GetMapping("/mergesort")
+    public ResponseEntity<Map<String, Object>> ejecutarMergesort(
+            @Parameter(description = "Criterio de ordenamiento: latitud, longitud, nombre", example = "latitud")
+            @RequestParam(name = "criterio", required = false, defaultValue = "nombre") String criterio,
+            @Parameter(description = "Orden: asc (ascendente) o desc (descendente)", example = "asc")
+            @RequestParam(name = "orden", required = false, defaultValue = "asc") String orden
+    ) {
+        return ResponseEntity.ok(servicio.ejecutarMergesort(criterio, orden));
+    }
 }

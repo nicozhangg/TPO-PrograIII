@@ -24,6 +24,7 @@
       <option value="dijkstra">Dijkstra (A → B)</option>
       <option value="bfs">BFS (rango km)</option>
       <option value="branch-bound">Branch & Bound TSP</option>
+      <option value="mergesort">Mergesort (Ordenar)</option>
     </select>
 
     <div id="params">
@@ -39,6 +40,18 @@
       
       <div id="params-branch-bound" class="params-group">
         <input id="origen-branch-bound" placeholder="Origen" aria-label="Origen" />
+      </div>
+      
+      <div id="params-mergesort" class="params-group">
+        <select id="criterio-mergesort" aria-label="Criterio de ordenamiento">
+          <option value="nombre">Por Nombre (alfabético)</option>
+          <option value="latitud">Por Latitud (Sur → Norte)</option>
+          <option value="longitud">Por Longitud (Oeste → Este)</option>
+        </select>
+        <select id="orden-mergesort" aria-label="Orden">
+          <option value="asc">Ascendente</option>
+          <option value="desc">Descendente</option>
+        </select>
       </div>
     </div>
 
@@ -60,7 +73,8 @@
         nearest: 'red',
         dijkstra: 'blue',
         bfs: 'green',
-        'branch-bound': 'purple'
+        'branch-bound': 'purple',
+        mergesort: 'orange'
       },
       estilos: {
         ruta: {
@@ -92,14 +106,17 @@
       params: {
         dijkstra: document.getElementById('params-dijkstra'),
         bfs: document.getElementById('params-bfs'),
-        'branch-bound': document.getElementById('params-branch-bound')
+        'branch-bound': document.getElementById('params-branch-bound'),
+        mergesort: document.getElementById('params-mergesort')
       },
       inputs: {
         origenDijkstra: document.getElementById('origen-dijkstra'),
         destinoDijkstra: document.getElementById('destino-dijkstra'),
         inicioBfs: document.getElementById('inicio-bfs'),
         maxkmBfs: document.getElementById('maxkm-bfs'),
-        origenBranchBound: document.getElementById('origen-branch-bound')
+        origenBranchBound: document.getElementById('origen-branch-bound'),
+        criterioMergesort: document.getElementById('criterio-mergesort'),
+        ordenMergesort: document.getElementById('orden-mergesort')
       }
     };
 
@@ -201,6 +218,8 @@
         elementos.params.bfs.classList.add('active');
       } else if (algoritmo === 'branch-bound') {
         elementos.params['branch-bound'].classList.add('active');
+      } else if (algoritmo === 'mergesort') {
+        elementos.params.mergesort.classList.add('active');
       }
     };
 
@@ -218,17 +237,32 @@
 
       const coords = puntosRuta.map(p => [p.lat, p.lon]);
 
-      // Crear marcadores
+      // Crear marcadores con números de posición
       puntosRuta.forEach((p, i) => {
-        crearMarcador([p.lat, p.lon], p.nombre, i);
+        const marker = crearMarcador([p.lat, p.lon], p.nombre, i);
+        
+        // Para mergesort, mostrar información de posición en el popup
+        if (algoritmo === 'mergesort') {
+          let popupContent = `<b>${i + 1}. ${p.nombre}</b>`;
+          if (data.criterio === 'latitud') {
+            popupContent += `<br>Latitud: ${p.lat.toFixed(3)}°`;
+          } else if (data.criterio === 'longitud') {
+            popupContent += `<br>Longitud: ${p.lon.toFixed(3)}°`;
+          } else if (data.criterio === 'nombre') {
+            popupContent += `<br>Orden alfabético`;
+          }
+          marker.bindPopup(popupContent);
+        }
       });
 
-      // Crear polilínea
+      // Dibujar líneas conectando los puntos en orden
       const linea = crearPolilinea(coords, color);
       map.fitBounds(linea.getBounds());
 
       // Popup con información
       let texto = `<b>${data.algoritmo}</b>`;
+      if (data.criterio) texto += `<br>Criterio: ${data.criterio}`;
+      if (data.orden) texto += `<br>Orden: ${data.orden}`;
       if (data.km_totales) texto += `<br>Distancia: ${data.km_totales} km`;
       if (data.max_km) texto += `<br>max_km: ${data.max_km}`;
       mostrarPopup(coords[0], texto);
@@ -267,6 +301,12 @@
         if (origen) {
           params.append('origen', origen);
         }
+      } else if (algoritmo === 'mergesort') {
+        const criterio = elementos.inputs.criterioMergesort.value;
+        const orden = elementos.inputs.ordenMergesort.value;
+        
+        params.append('criterio', criterio);
+        params.append('orden', orden);
       }
 
       return params.toString() ? `${url}?${params.toString()}` : url;
@@ -277,6 +317,8 @@
         return data.puntos_ruta;
       } else if (algoritmo === 'bfs') {
         return data.puntos_orden;
+      } else if (algoritmo === 'mergesort') {
+        return data.puntos_ordenados;
       }
       return null;
     };
@@ -305,7 +347,7 @@
         // Limpiar de nuevo por si acaso antes de mostrar la nueva ruta
         limpiarMapa();
 
-        if (algoritmo === 'branch-bound' || algoritmo === 'nearest' || algoritmo === 'dijkstra' || algoritmo === 'bfs') {
+        if (algoritmo === 'branch-bound' || algoritmo === 'nearest' || algoritmo === 'dijkstra' || algoritmo === 'bfs' || algoritmo === 'mergesort') {
           const puntosRuta = obtenerPuntosRuta(data, algoritmo);
           const color = CONFIG.colores[algoritmo] || 'red';
           visualizarRuta(puntosRuta, color, algoritmo, data);

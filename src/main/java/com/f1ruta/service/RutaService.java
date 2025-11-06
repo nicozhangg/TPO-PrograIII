@@ -4,6 +4,7 @@ import com.f1ruta.algoritmo.RutaF1TSP;
 import com.f1ruta.algoritmo.DijkstraRutas;
 import com.f1ruta.algoritmo.BFSRutas;
 import com.f1ruta.algoritmo.BranchBoundTSP;
+import com.f1ruta.algoritmo.MergesortCircuitos;
 import com.f1ruta.algoritmo.RutaF1TSP.Circuito;
 import com.f1ruta.repository.CircuitoRepository;
 import org.springframework.stereotype.Service;
@@ -142,5 +143,61 @@ public class RutaService {
         out.put("puntos", puntos(circuitos)); // todos los marcadores
         out.put("puntos_ruta", puntosEnOrden(circuitos, res.ruta())); // ruta ordenada para visualización
         return out;
+    }
+
+    /** Mergesort: Ordena circuitos por diferentes criterios (Divide y Vencerás) */
+    public Map<String, Object> ejecutarMergesort(String criterio, String orden) {
+        List<Circuito> circuitos = cargarCircuitos();
+        
+        // Valores por defecto
+        criterio = (criterio == null || criterio.trim().isEmpty()) ? "nombre" : criterio;
+        orden = (orden == null || orden.trim().isEmpty()) ? "asc" : orden;
+
+        var res = MergesortCircuitos.ordenar(circuitos, criterio, orden);
+
+        // Calcular distancia total y preparar puntos para visualización
+        List<Map<String, Object>> puntosVisualizacion = new ArrayList<>();
+        double distanciaTotal = 0.0;
+        
+        for (int i = 0; i < res.circuitosOrdenados().size(); i++) {
+            Map<String, Object> circ = res.circuitosOrdenados().get(i);
+            
+            // Agregar punto para visualización
+            puntosVisualizacion.add(Map.of(
+                "nombre", circ.get("nombre"),
+                "lat", circ.get("latitud"),
+                "lon", circ.get("longitud")
+            ));
+            
+            // Calcular distancia entre circuitos consecutivos
+            if (i > 0) {
+                Map<String, Object> anterior = res.circuitosOrdenados().get(i - 1);
+                distanciaTotal += haversine(
+                    (Double) anterior.get("latitud"), (Double) anterior.get("longitud"),
+                    (Double) circ.get("latitud"), (Double) circ.get("longitud")
+                );
+            }
+        }
+
+        return Map.of(
+            "algoritmo", "Mergesort (Divide y Vencerás)",
+            "criterio", res.criterio(),
+            "orden", res.orden(),
+            "cantidad_circuitos", res.cantidadCircuitos(),
+            "circuitos_ordenados", res.circuitosOrdenados(),
+            "puntos_ordenados", puntosVisualizacion,
+            "km_totales", Math.round(distanciaTotal)
+        );
+    }
+    
+    /** Distancia Haversine en km (helper para calcular distancias) */
+    private double haversine(double lat1, double lon1, double lat2, double lon2) {
+        final double R = 6371.0;
+        double p1 = Math.toRadians(lat1), p2 = Math.toRadians(lat2);
+        double dphi = p2 - p1;
+        double dlambda = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dphi / 2) * Math.sin(dphi / 2)
+                + Math.cos(p1) * Math.cos(p2) * Math.sin(dlambda / 2) * Math.sin(dlambda / 2);
+        return 2 * R * Math.asin(Math.sqrt(a));
     }
 }

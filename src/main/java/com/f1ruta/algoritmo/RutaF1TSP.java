@@ -103,20 +103,29 @@ public class RutaF1TSP {
 
     /** Ejecuta el TSP heurístico sobre la lista de circuitos (ruta abierta, no vuelve al inicio) */
     public static Resultado calcularRuta(List<Circuito> circuitos) {
+        if (circuitos == null || circuitos.isEmpty()) {
+            return new Resultado(List.of(), 0);
+        }
+        
         double[][] d = distancias(circuitos);
         int n = circuitos.size();
-        List<Integer> mejor = null;
-        double mejorL = Double.POSITIVE_INFINITY;
+        List<Integer> mejor = vecinoMasCercano(d, 0); // Inicializar con primer circuito
+        double mejorL = largoRuta(d, mejor);
 
-        for (int s = 0; s < n; s++) {
+        for (int s = 1; s < n; s++) {
             List<Integer> nn = vecinoMasCercano(d, s);
             List<Integer> opt = dosOpt(d, nn);
             double L = largoRuta(d, opt);
-            if (L < mejorL) { mejorL = L; mejor = opt; }
+            if (L < mejorL) { 
+                mejorL = L; 
+                mejor = opt; 
+            }
         }
 
         List<String> nombres = new ArrayList<>();
-        for (int idx : mejor) nombres.add(circuitos.get(idx).nombre);
+        for (int idx : mejor) {
+            nombres.add(circuitos.get(idx).nombre);
+        }
         return new Resultado(nombres, Math.round(mejorL));
     }
 }
