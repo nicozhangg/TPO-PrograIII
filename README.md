@@ -1,5 +1,10 @@
 # 🏎️ Ruta F1 Backend
 
+Equipo 2
+Gómez Moreno Laureano 
+Milharcic Lucas 
+Zhang Nicolás 
+
 Aplicación backend desarrollada en Spring Boot para optimizar rutas del campeonato de Fórmula 1, implementando diferentes algoritmos de optimización para encontrar el recorrido más eficiente entre los circuitos del calendario 2025.
 
 ## 🚀 Características
