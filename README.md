@@ -1,26 +1,71 @@
-# Ruta F1 Backend (Spring Boot)
+# 🏎️ Ruta F1 Backend
 
-API en **Java + Spring Boot 3.5.7** para ejecutar algoritmos de optimización de ruta F1.
+Aplicación backend desarrollada en Spring Boot para optimizar rutas del campeonato de Fórmula 1, implementando diferentes algoritmos de optimización para encontrar el recorrido más eficiente entre los circuitos del calendario 2025.
 
-## Endpoints
-- `GET /api/algoritmos/nearest` → Ejecuta **Vecino Más Cercano + 2-opt** y devuelve el orden propuesto y la distancia total.
-- **Swagger UI**: `http://localhost:8080/swagger-ui.html`
+## 🚀 Características
 
-## Ejecutar
-```bash
-mvn spring-boot:run
-```
-o empaquetado:
-```bash
-mvn -q -DskipTests package
-java -jar target/ruta-f1-backend-0.0.1-SNAPSHOT.jar
-```
+- Implementación de múltiples algoritmos de optimización:
+  - Vecino Más Cercano + optimización 2-opt
+  - BFS (Búsqueda en Anchura)
+  - Algoritmo de Dijkstra
+  - Branch and Bound para TSP
+- Interfaz visual interactiva para visualizar las rutas
+- API RESTful documentada con Swagger
+- Integración opcional con Neo4j para persistencia de datos
+- Visualización de rutas en mapa interactivo
 
-## Configurar Neo4j (opcional)
-Descomentar propiedades en `src/main/resources/application.properties` y asegurarte que el servidor Neo4j esté activo.
+## 🛠️ Tecnologías
 
-## Ver mapa
-http://localhost:8080
+- **Backend**: Java 17 + Spring Boot 3.5.7
+- **Base de datos**: Neo4j (opcional)
+- **Documentación**: Swagger / OpenAPI
+- **Frontend**: HTML, CSS, JavaScript
+
+## 📋 Requisitos Previos
+
+- Java JDK 17 o superior
+- Maven 3.6+
+- Neo4j
+
+## ⚙️ Instalación y Ejecución
+
+1. **Clonar el repositorio**
+   ```bash
+   git clone https://github.com/nicozhangg/TPO-PrograIII.git
+   cd TPO-PrograIII
+   ```
+
+2. **Compilar y ejecutar**
+   ```bash
+   mvn spring-boot:run
+   ```
+   
+   O generar el archivo JAR:
+   ```bash
+   mvn -q -DskipTests package
+   java -jar target/ruta-f1-backend-0.0.1-SNAPSHOT.jar
+   ```
+
+3. **Acceder a la aplicación**
+   - Frontend: http://localhost:8080
+   - Swagger UI: http://localhost:8080/swagger-ui.html
+
+## 🔌 API Endpoints
+
+- `GET /api/algoritmos/nearest` - Ejecuta el algoritmo del Vecino Más Cercano + 2-opt
+- `GET /api/algoritmos/bfs` - Ejecuta el algoritmo BFS para encontrar rutas
+- `GET /api/algoritmos/dijkstra` - Calcula la ruta más corta usando Dijkstra
+- `GET /api/algoritmos/branchbound` - Implementa Branch and Bound para TSP
+
+## 🗄️ Configuración Neo4j (Opcional)
+
+1. Asegúrate de tener Neo4j instalado y ejecutándose
+2. Descomenta y configura las propiedades en `src/main/resources/application.properties`:
+   ```properties
+   spring.neo4j.uri=bolt://localhost:7687
+   spring.neo4j.authentication.username=neo4j
+   spring.neo4j.authentication.password=tu_contraseña
+   ```
 
 Cargar la base de neo4j
 // 1) Evitar duplicados por nombre
